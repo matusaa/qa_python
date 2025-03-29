@@ -1,5 +1,4 @@
 import pytest
-
 from main import BooksCollector
 
 
@@ -35,15 +34,21 @@ class TestBooksCollector:
         collector.add_new_book('Маска')
         assert len(collector.get_books_genre()) == 1
 
-    def test_set_valid_genre(self, collector):
-        collector.set_book_genre('Маска', 'Комедии')
-        assert collector.get_book_genre('Маска') == 'Комедии'
+    @pytest.mark.parametrize("genre", ["Комедии", "Фантастика", "Детективы"])
+    def test_set_valid_genre(self, collector, genre):
+        collector.set_book_genre('Маска', genre)
+        assert collector.get_book_genre('Маска') == genre
 
     def test_get_book_genre_book_without_genre(self, collector):
         assert collector.get_book_genre('Маска') == ''
 
-    def test_get_books_with_specific_genre_existing_book(self, collector_withs_genres):
-        assert collector_withs_genres.get_books_with_specific_genre('Фантастика') == ['Звездные войны']
+    @pytest.mark.parametrize("genre, expected_books", [
+        ("Фантастика", ["Звездные войны"]),
+        ("Ужасы", ["Пила-6"]),
+        ("Детективы", [])
+    ])
+    def test_get_books_with_specific_genre_existing_book(self, collector_withs_genres, genre, expected_books):
+        assert collector_withs_genres.get_books_with_specific_genre(genre) == expected_books
 
     def test_get_books_for_children_no_children_books(self):
         collector = BooksCollector()
@@ -61,10 +66,15 @@ class TestBooksCollector:
         collector.add_book_in_favorites('Несуществующая книга')
         assert 'Несуществующая книга' not in collector.favorites
 
-    def test_delete_book_from_favorites_existing_book(self,collector_withs_genres):
+    @pytest.mark.parametrize("book_to_delete, expected_favorites", [
+        ("Звездные войны", ["Пила-6"]),
+        ("Пила-6", ["Звездные войны"]),
+    ])
+    def test_delete_book_from_favorites_existing_book(self, collector_withs_genres, book_to_delete, expected_favorites):
         collector_withs_genres.add_book_in_favorites('Звездные войны')
-        collector_withs_genres.delete_book_from_favorites('Звездные войны')
-        assert collector_withs_genres.favorites == []
+        collector_withs_genres.add_book_in_favorites('Пила-6')
+        collector_withs_genres.delete_book_from_favorites(book_to_delete)
+        assert collector_withs_genres.favorites == expected_favorites
 
-    def (self, collector_withs_genres):
-        assert collector_withs_genres.favorites == []
+    def test_get_list_of_favorites_books_empty_list(self, collector_withs_genres):
+        assert collector_withs_genres.get_list_of_favorites_books() == []
