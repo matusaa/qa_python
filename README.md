@@ -1,4 +1,4 @@
-# qa_python
+Тестирование BooksCollector
 
 Проверка метода add_new_book
 1. test_add_empty_name_book - Проверка невозможности добавить книгу с пустым именем
